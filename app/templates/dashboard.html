@@ -1,0 +1,210 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <title>Dashboard</title>
+    <link
+        rel="stylesheet"
+        href="/static/style.css"
+    >
+</head>
+
+<body>
+
+    <h1>
+        Welcome To TaskMind 🚀
+    </h1>
+
+    <h2>Create Task</h2>
+
+    <form id="taskForm">
+
+        <input
+            type="file"
+            id="file"
+            required
+        >
+
+        <br><br>
+
+        <select id="task_type">
+
+            <option value="workflow">
+                Workflow Analysis
+            </option>
+
+            <option value="meeting">
+                Meeting Notes
+            </option>
+
+            <option value="client">
+                Client Request
+            </option>
+
+            <option value="report">
+                Team Report
+            </option>
+
+        </select>
+
+        <br><br>
+
+        <button type="submit">
+            Create Task
+        </button>
+
+    </form>
+
+    <hr>
+
+    <h2>Your Tasks</h2>
+
+    <ul id="taskList">
+
+        {% for task in tasks %}
+
+            <div class="task-card">
+
+                <h3>
+                    {{ task.title }}
+                </h3>
+
+                <p class="{{ task.status }}">
+
+                    Status:
+                    {{ task.status }}
+
+                </p>
+
+                <p>
+
+                    AI Result:
+                    {{ task.result }}
+
+                </p>
+
+            </div>
+
+        {% endfor %}
+
+    </ul>
+
+    <script>
+                const token =
+                localStorage.getItem(
+                    "token"
+                )
+
+                const form =
+                    document.getElementById(
+                        "taskForm"
+                    )
+
+                form.addEventListener(
+                    "submit",
+
+                    async (e) => {
+
+            e.preventDefault()
+
+            const task_type =
+                document.getElementById(
+                    "task_type"
+                ).value
+
+            const file =
+                document.getElementById(
+                    "file"
+                ).files[0]
+
+            const formData =
+                new FormData()
+
+            formData.append(
+                "file",
+                file
+            )
+
+            formData.append(
+                "task_type",
+                task_type
+            )
+
+            const response =
+                await fetch(
+                    "/tasks",
+                    {
+                        method: "POST",
+
+                        headers: {
+                            "Authorization":
+                            "Bearer " + token
+                        },
+
+                        body: formData
+                    }
+                )
+
+                const data =
+                    await response.json()
+
+                console.log(data)
+
+                alert(data.message)
+
+                loadTasks()
+
+            }
+        )
+
+        async function loadTasks() {
+
+            const response =
+                await fetch(
+                    "/tasks",
+                    {
+                        headers: {
+                            "Authorization":
+                            "Bearer " + token
+                        }
+                    }
+                )
+
+            const tasks =
+                await response.json()
+
+            const taskList =
+                document.getElementById(
+                    "taskList"
+                )
+
+            taskList.innerHTML = ""
+
+            tasks.forEach(task => {
+
+                taskList.innerHTML += `
+                    <div class="task-card">
+                        <h3>${task.title}</h3>
+                        <p class="${task.status}">
+                            Status: ${task.status}
+                        </p>
+                        <p>
+                            AI Result: ${task.result}
+                        </p>
+                    </div>
+                `
+            })
+        }
+
+        loadTasks()
+
+        setInterval(
+            loadTasks,
+            2000
+        )
+
+    </script>
+
+</body>
+
+</html>

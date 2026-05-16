@@ -1,0 +1,132 @@
+body {
+    background: #111827;
+    color: white;
+    font-family: Arial;
+}
+
+.container {
+    text-align: center;
+    margin-top: 100px;
+}
+
+button {
+    padding: 10px 20px;
+    border: none;
+    background: #2563eb;
+    color: white;
+    cursor: pointer;
+}
+
+body {
+
+    background: #0f172a;
+
+    color: white;
+
+    font-family: Arial;
+
+    padding: 30px;
+}
+
+h1 {
+
+    color: #38bdf8;
+}
+
+form {
+
+    background: #1e293b;
+
+    padding: 20px;
+
+    border-radius: 10px;
+
+    margin-bottom: 30px;
+}
+
+input,
+select {
+
+    padding: 12px;
+
+    border: none;
+
+    border-radius: 10px;
+
+    width: 100%;
+
+    margin-bottom: 15px;
+}
+
+button {
+
+    padding: 12px 24px;
+
+    border: none;
+
+    border-radius: 10px;
+
+    cursor: pointer;
+
+    width: auto;
+}
+
+button {
+
+    background: #38bdf8;
+
+    color: white;
+
+    font-weight: bold;
+
+    cursor: pointer;
+}
+
+.task-card {
+
+    background: #1e293b;
+
+    padding: 20px;
+
+    border-radius: 12px;
+
+    margin-bottom: 20px;
+}
+
+.pending {
+
+    color: orange;
+}
+
+.processing {
+
+    color: yellow;
+}
+
+.completed {
+
+    color: #22c55e;
+}
+
+.failed {
+
+    color: red;
+}
+
+.home-buttons {
+
+    display: flex;
+
+    justify-content: center;
+
+    gap: 20px;
+
+    margin-top: 20px;
+}
+
+.home-buttons button {
+
+    width: auto;
+
+    padding: 12px 28px;
+}
