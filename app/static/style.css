@@ -130,3 +130,25 @@ button {
 
     padding: 12px 28px;
 }
+
+.ai-result {
+
+    background: #0f172a;
+
+    padding: 15px;
+
+    border-radius: 10px;
+
+    margin-top: 15px;
+}
+
+.ai-result pre {
+
+    white-space: pre-wrap;
+
+    font-family: Arial;
+
+    line-height: 1.7;
+
+    color: #e2e8f0;
+}

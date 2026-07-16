@@ -54,12 +54,47 @@ def process_task(task_id):
                 text += page_text
 
         ai_result = analyze_resume(text)
+        if "PRIORITY:" in ai_result and "High" in ai_result:
+            task.priority = "High"
+        elif "PRIORITY:" in ai_result and "Low" in ai_result:
+            task.priority = "Low"
+        else:
+            task.priority = "Medium"
 
         task.result = ai_result
         task.status = "completed"
+        lines = ai_result.split("\n")
+
+        inside_action_items = False
+
+        for line in lines:
+
+            clean_line = line.strip()
+
+            if clean_line.startswith("ACTION ITEMS"):
+                inside_action_items = True
+                continue
+
+            if clean_line.startswith("PRIORITY"):
+                inside_action_items = False
+
+            if inside_action_items and clean_line.startswith("-"):
+
+                subtask_title = clean_line.replace("-", "").strip()
+
+                subtask = Task(
+                    title=subtask_title,
+                    task_type="subtask",
+                    status="pending",
+                    priority=task.priority,
+                    parent_id=task.id,
+                    user_id=task.user_id
+                )
+
+                db.add(subtask)
 
         db.commit()
-        
+
 
         print("TASK COMPLETED")
 
@@ -137,8 +172,79 @@ def get_tasks(
         User.email == current_user
     ).first()
 
-    tasks = db.query(Task).filter(
-        Task.user_id == user.id
+    main_tasks = db.query(Task).filter(
+        Task.user_id == user.id,
+        Task.parent_id == None
     ).all()
 
-    return tasks
+    subtasks = db.query(Task).filter(
+        Task.user_id == user.id,
+        Task.parent_id != None
+    ).all()
+
+    main_task_data = []
+
+    for main_task in main_tasks:
+        related_subtasks = [
+            subtask for subtask in subtasks
+            if subtask.parent_id == main_task.id
+        ]
+
+        total = len(related_subtasks)
+
+        completed = len([
+            subtask for subtask in related_subtasks
+            if subtask.status == "completed"
+        ])
+
+        progress = 0
+
+        if total > 0:
+            progress = int(
+                (completed / total) * 100
+            )
+
+        main_task_data.append({
+            "id": main_task.id,
+            "title": main_task.title,
+            "status": main_task.status,
+            "priority": main_task.priority,
+            "result": main_task.result,
+            "total_subtasks": total,
+            "completed_subtasks": completed,
+            "progress": progress
+        })
+
+    return {
+        "main_tasks": main_tasks,
+        "subtasks": subtasks
+    }
+
+@router.put("/tasks/{task_id}/complete")
+def complete_task(
+    task_id: int,
+    current_user: str = Depends(get_current_user),
+    db: Session = Depends(get_db)
+):
+
+    user = db.query(User).filter(
+        User.email == current_user
+    ).first()
+
+    task = db.query(Task).filter(
+        Task.id == task_id,
+        Task.user_id == user.id
+    ).first()
+
+    if not task:
+        return {
+            "error": "Task not found"
+        }
+
+    task.status = "completed"
+
+    db.commit()
+
+    return {
+        "message": "Task completed"
+    }

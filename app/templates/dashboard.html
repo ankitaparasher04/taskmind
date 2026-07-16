@@ -59,35 +59,11 @@
 
     <h2>Your Tasks</h2>
 
-    <ul id="taskList">
+    <h2>Main Workflows</h2>
+    <div id="mainTaskList"></div>
 
-        {% for task in tasks %}
-
-            <div class="task-card">
-
-                <h3>
-                    {{ task.title }}
-                </h3>
-
-                <p class="{{ task.status }}">
-
-                    Status:
-                    {{ task.status }}
-
-                </p>
-
-                <p>
-
-                    AI Result:
-                    {{ task.result }}
-
-                </p>
-
-            </div>
-
-        {% endfor %}
-
-    </ul>
+    <h2>Generated Subtasks</h2>
+    <div id="subtaskList"></div>
 
     <script>
                 const token =
@@ -170,33 +146,83 @@
                     }
                 )
 
-            const tasks =
+            const data =
                 await response.json()
+            console.log(data)
 
-            const taskList =
-                document.getElementById(
-                    "taskList"
-                )
+            const mainTasks = data.main_tasks
+            const subtasks = data.subtasks
 
-            taskList.innerHTML = ""
+            const mainTaskList =
+                document.getElementById("mainTaskList")
 
-            tasks.forEach(task => {
+            const subtaskList =
+                document.getElementById("subtaskList")
 
-                taskList.innerHTML += `
+            mainTaskList.innerHTML = ""
+            subtaskList.innerHTML = ""
+
+            mainTasks.forEach(task => {
+
+                mainTaskList.innerHTML += `
                     <div class="task-card">
                         <h3>${task.title}</h3>
                         <p class="${task.status}">
                             Status: ${task.status}
                         </p>
                         <p>
-                            AI Result: ${task.result}
+                            Progress:
+                            ${task.completed_subtasks || 0} /
+                            ${task.total_subtasks || 0}
+                            (${task.progress || 0}%)
                         </p>
+                        
+                        <div class="ai-result">
+                            <h4>Workflow Output</h4>
+                            <pre>${task.result || "Processing..."}</pre>
+                        </div>
+
+                    </div>
+                `
+            })
+            subtasks.forEach(task => {
+
+                subtaskList.innerHTML += `
+                    <div class="task-card">
+                        <h3>${task.title}</h3>
+
+                        <p class="${task.status}">
+                            Status: ${task.status}
+                        </p>
+
+                        <p>
+                            Priority: ${task.priority}
+                        </p>
+                        <button onclick="completeTask(${task.id})">
+                            Mark Complete
+                        </button>
                     </div>
                 `
             })
         }
 
         loadTasks()
+        async function completeTask(taskId) {
+
+        await fetch(
+            `/tasks/${taskId}/complete`,
+            {
+                method: "PUT",
+
+                headers: {
+                    "Authorization":
+                    "Bearer " + token
+                }
+            }
+        )
+
+        loadTasks()
+    }
 
         setInterval(
             loadTasks,
